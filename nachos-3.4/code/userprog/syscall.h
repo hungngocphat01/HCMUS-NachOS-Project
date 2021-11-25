@@ -29,6 +29,10 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
+#define SC_Sub		11
+#define SC_ReadInt	12
+#define SC_ReadChar 13
+#define SC_PrintChar 14
 
 #ifndef IN_ASM
 
@@ -123,6 +127,29 @@ void Fork(void (*func)());
  * or not. 
  */
 void Yield();		
+
+/*
+ * Subtract two numbers
+ */
+int Sub(int a, int b);
+
+
+/*
+ * Read an integer from console
+ */
+int ReadInt();
+
+/*
+ * Read an character from console
+ */
+char ReadChar();
+
+/*
+ * Print a character to console
+ */
+void PrintChar(char c);
+
+
 
 #endif /* IN_ASM */
 

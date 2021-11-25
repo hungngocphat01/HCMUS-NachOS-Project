@@ -129,6 +129,22 @@ Yield:
 	syscall
 	j	$31
 	.end Yield
+	
+	.globl Sub
+	.ent	Sub
+Sub:
+	addiu $2,$0,SC_Sub
+	syscall
+	j	$31
+	.end Subb
+
+	.globl ReadInt
+	.ent	ReadInt
+ReadInt:
+	addiu $2,$0,SC_ReadInt
+	syscall
+	j	$31
+	.end ReadInt
 
 /* dummy function to keep gcc happy */
         .globl  __main

@@ -18,6 +18,7 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
+SynchConsole* synchconsole;
 
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
@@ -133,6 +134,8 @@ Initialize(int argc, char **argv)
     stats = new Statistics();			// collect statistics
     interrupt = new Interrupt;			// start up interrupt handling
     scheduler = new Scheduler();		// initialize the ready queue
+    synchconsole = new SynchConsole();  // synchronous console to read/write
+
     if (randomYield)				// start the timer (if needed)
 	timer = new Timer(TimerInterruptHandler, 0, randomYield);
 
