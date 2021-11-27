@@ -147,34 +147,81 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
+	
+	switch(which){
+		case NoException:
+			return;
+		
+		case PageFaultException:
+			DEBUG('a', "\nNo valid translation found.\n");
+			printf("\nNo valid translation found.\n");
+			interrupt->Halt();
+		break;
 
-    if (which == SyscallException) {
-    	switch (type) {
-    		// Khi nguoi dung goi syscall halt
-    		case SC_Halt:
-    			DEBUG('a', "Shutdown, initiated by user program.\n");
-	   			interrupt->Halt();
-	   			break; 
-            // Tru 2 so 
-            case SC_Sub:
-                syscallSub();
-                break;
+		case ReadOnlyException:
+			DEBUG('a', "\nWrite attempted to page marked read-only.\n");
+			printf("\nWrite attempted to page marked read-only.\n");
+			interrupt->Halt();
+			break;
 
-            case SC_ReadChar:
-                syscallReadChar();
-                break;
+		case BusErrorException:
+			DEBUG('a', "\nTranslation resulted invalid physical address.\n");
+			printf("\nTranslation resulted invalid physical address.\n");
+			interrupt->Halt();
+			break;
 
-            case SC_PrintChar:
-                syscallPrintChar();
-                break;
+		case AddressErrorException:
+			DEBUG('a', "\nUnaligned reference or one that was beyond the end of the address space.\n");
+			printf("\nUnaligned reference or one that was beyond the end of the address space.\n");
+			interrupt->Halt();
+			break;
 
-            case SC_ReadInt:
-                syscallReadInt();
-                break;
-        }
-        fetchNextInstruction();
-    } else {
-		printf("Unexpected user mode exception %d %d\n", which, type);
-		ASSERT(FALSE);
-    }
+		case OverflowException:
+			DEBUG('a', "\nInteger overflow in add or sub.\n");
+			printf("\nInteger overflow in add or sub.\n");
+			interrupt->Halt();
+			break;
+
+		case IllegalInstrException:
+			DEBUG('a', "\nUnimplemented or reserved instr.\n");
+			printf("\nUnimplemented or reserved instr.\n");
+			interrupt->Halt();
+			break;
+
+		case NumExceptionTypes:
+			DEBUG('a', "\nNumber exception types.\n");
+			printf("\nNumber exception types.\n");
+			interrupt->Halt();
+			break;
+			
+		case SyscallException:
+			switch (type) {
+				// Khi nguoi dung goi syscall halt
+				case SC_Halt:
+					DEBUG('a', "Shutdown, initiated by user program.\n");
+					interrupt->Halt();
+					break; 
+				// Tru 2 so 
+				case SC_Sub:
+					syscallSub();
+					break;
+
+				case SC_ReadChar:
+					syscallReadChar();
+					break;
+
+				case SC_PrintChar:
+					syscallPrintChar();
+					break;
+
+				case SC_ReadInt:
+					syscallReadInt();
+					break;
+					
+				default:
+					break;
+			}		
+
+			fetchNextInstruction();
+	}
 }
