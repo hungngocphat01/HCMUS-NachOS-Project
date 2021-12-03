@@ -77,3 +77,9 @@ rwchar_test.o: rwchar_test.c
 rwchar_test: rwchar_test.o start.o
 	$(LD) $(LDFLAGS) start.o rwchar_test.o -o rwchar_test.coff
 	../bin/coff2noff rwchar_test.coff rwchar_test
+
+rwstring_test.o: rwstring_test.c
+	$(CC) $(CFLAGS) -c rwstring_test.c
+rwstring_test: rwstring_test.o start.o
+	$(LD) $(LDFLAGS) start.o rwstring_test.o -o rwstring_test.coff
+	../bin/coff2noff rwstring_test.coff rwstring_test

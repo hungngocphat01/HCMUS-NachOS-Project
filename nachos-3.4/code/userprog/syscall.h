@@ -33,6 +33,8 @@
 #define SC_ReadInt	12
 #define SC_ReadChar 13
 #define SC_PrintChar 14
+#define SC_ReadString 15
+#define SC_PrintString 16
 
 #ifndef IN_ASM
 
@@ -149,6 +151,15 @@ char ReadChar();
  */
 void PrintChar(char c);
 
+/*
+ * Read a string to console
+ */
+void ReadString(char buffer[], int length);
+
+/*
+ * Print a character to console
+ */
+void PrintString(char buffer[]);
 
 
 #endif /* IN_ASM */
