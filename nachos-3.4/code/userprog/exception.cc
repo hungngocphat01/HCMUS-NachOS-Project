@@ -194,6 +194,59 @@ int System2User(int Addr, int len, char* buffer)
 	return i;
 }
 
+void syscallPrintInt()
+{	
+	int number = machine->ReadRegister(4);
+	if(number == 0)
+    {
+        synchconsole->Write("0", 1); // In ra man hinh so 0
+        IncreasePC();
+        return;    
+    }
+                    
+    /*Qua trinh chuyen so thanh chuoi de in ra man hinh*/
+    bool isNegative = false; // gia su la so duong
+    int numberOfNum = 0; // Bien de luu so chu so cua number
+    int firstNumIndex = 0; 
+			
+    if(number < 0)
+    {
+        isNegative = true;
+         number = number * -1; // Nham chuyen so am thanh so duong de tinh so chu so
+        firstNumIndex = 1; 
+    } 	
+                    
+    int t_number = number; // bien tam cho number
+    while(t_number)
+    {
+        numberOfNum++;
+        t_number /= 10;
+    }
+    
+	// Tao buffer chuoi de in ra man hinh
+    char* buffer;
+    int MAX_BUFFER = 255;
+    buffer = new char[MAX_BUFFER + 1];
+    for(int i = firstNumIndex + numberOfNum - 1; i >= firstNumIndex; i--)
+    {
+        buffer[i] = (char)((number % 10) + 48);
+        number /= 10;
+    }
+    if(isNegative)
+    {
+        buffer[0] = '-';
+		buffer[numberOfNum + 1] = 0;
+        synchconsole->Write(buffer, numberOfNum + 1);
+        delete buffer;
+        IncreasePC();
+        return;
+    }
+	buffer[numberOfNum] = 0;	
+    synchconsole->Write(buffer, numberOfNum);
+    delete buffer;
+    IncreasePC();
+    return;        		
+}
 
 void syscallReadString(){
     
@@ -301,11 +354,17 @@ ExceptionHandler(ExceptionType which)
 					syscallReadInt();
 					break;
 
-                case SC_ReadString:
-                    syscallReadString();
-                    break;	
-                case SC_PrintString:
-                    syscallPrintString();    
+				case SC_PrintInt:
+					syscallPrintInt();
+					break;
+
+                		case SC_ReadString:
+                    			syscallReadString();
+                    			break;	
+
+                		case SC_PrintString:
+                    			syscallPrintString();
+					break;    
 				default:
 					break;
 			}		

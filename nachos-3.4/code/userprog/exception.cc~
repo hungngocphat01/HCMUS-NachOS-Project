@@ -194,6 +194,59 @@ int System2User(int Addr, int len, char* buffer)
 	return i;
 }
 
+void syscallPrintInt()
+{	
+	int number = machine->ReadRegister(4);
+	if(number == 0)
+    {
+        synchconsole->Write("0", 1); // In ra man hinh so 0
+        IncreasePC();
+        return;    
+    }
+                    
+    /*Qua trinh chuyen so thanh chuoi de in ra man hinh*/
+    bool isNegative = false; // gia su la so duong
+    int numberOfNum = 0; // Bien de luu so chu so cua number
+    int firstNumIndex = 0; 
+			
+    if(number < 0)
+    {
+        isNegative = true;
+         number = number * -1; // Nham chuyen so am thanh so duong de tinh so chu so
+        firstNumIndex = 1; 
+    } 	
+                    
+    int t_number = number; // bien tam cho number
+    while(t_number)
+    {
+        numberOfNum++;
+        t_number /= 10;
+    }
+    
+	// Tao buffer chuoi de in ra man hinh
+    char* buffer;
+    int MAX_BUFFER = 255;
+    buffer = new char[MAX_BUFFER + 1];
+    for(int i = firstNumIndex + numberOfNum - 1; i >= firstNumIndex; i--)
+    {
+        buffer[i] = (char)((number % 10) + 48);
+        number /= 10;
+    }
+    if(isNegative)
+    {
+        buffer[0] = '-';
+		buffer[numberOfNum + 1] = 0;
+        synchconsole->Write(buffer, numberOfNum + 1);
+        delete buffer;
+        IncreasePC();
+        return;
+    }
+	buffer[numberOfNum] = 0;	
+    synchconsole->Write(buffer, numberOfNum);
+    delete buffer;
+    IncreasePC();
+    return;        		
+}
 
 void syscallReadString(){
     
@@ -203,7 +256,7 @@ void syscallReadString(){
 	Addr = machine->ReadRegister(4); // Lay dia chi tham so buffer truyen vao tu thanh ghi so 4
 	length = machine->ReadRegister(5); // Lay do dai toi da cua chuoi nhap vao tu thanh ghi so 5
 	buffer = User2System(Addr, length); // Copy chuoi tu vung nho User Space sang System Space
-	gSynchConsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
+	synchconsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
 	System2User(Addr, length, buffer); // Copy chuoi tu vung nho System Space sang vung nho User Space
 	delete buffer; 
 	IncreasePC(); // Tang Program Counter 
@@ -220,7 +273,7 @@ void syscallPrintString(){
 	buffer = User2System(Addr, 255); // Copy chuoi tu vung nho User Space sang System Space voi bo dem buffer dai 255 ki tu
 	int length = 0;
 	while (buffer[length] != 0) length++; // Dem do dai that cua chuoi
-	gSynchConsole->Write(buffer, length + 1); // Goi ham Write cua SynchConsole de in chuoi
+	synchconsole->Write(buffer, length + 1); // Goi ham Write cua SynchConsole de in chuoi
 	delete buffer; 
 	    //IncreasePC(); // Tang Program Counter 
 }
@@ -300,12 +353,15 @@ ExceptionHandler(ExceptionType which)
 				case SC_ReadInt:
 					syscallReadInt();
 					break;
-
-                case SC_ReadString:
-                    syscallReadString();
-                    break;	
-                case SC_PrintString:
-                    syscallPrintString();    
+				case SC_PrintInt:
+					syscallPrintInt();
+					break;
+                		case SC_ReadString:
+                    			syscallReadString();
+                    			break;	
+                		case SC_PrintString:
+                    			syscallPrintString();
+					break;    
 				default:
 					break;
 			}		
