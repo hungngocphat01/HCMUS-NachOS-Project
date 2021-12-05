@@ -94,6 +94,7 @@ void syscallReadInt() {
     char* buffer = new char[MAX_SIZE];
     // Kich thuoc thuc su da doc
     int numBytesRead = synchconsole->Read(buffer, MAX_SIZE);
+    // debugging
     // printf("\nBuffer read: %s\n", buffer);
     // printf("\nBytes read: %d\n", numBytesRead);
 
@@ -143,64 +144,14 @@ void syscallReadInt() {
     delete[] buffer;
 }
 
-// Input: Khong gian dia chi User(int) - gioi han cua buffer(int)
-// Output: Bo nho dem Buffer(char*)
-// Chuc nang: Sao chep vung nho User sang vung nho System
-char* User2System(int Addr, int limit)
-{
-	int i; //chi so index
-	int oneChar;
-	char* kernelBuf = NULL;
-	kernelBuf = new char[limit + 1]; //can cho chuoi terminal
-	if (kernelBuf == NULL)
-		return kernelBuf;
-		
-	memset(kernelBuf, 0, limit + 1);
-	
-	for (i = 0; i < limit; i++)
-	{
-		machine->ReadMem(Addr + i, 1, &oneChar);
-		kernelBuf[i] = (char)oneChar;
-		if (oneChar == 0)
-			break;
-	}
-	return kernelBuf;
-}
-
-// Doi thanh ghi Program counter cua he thong ve sau 4 byte de tiep tuc nap lenh
-void IncreasePC()
-{
-	int counter = machine->ReadRegister(PCReg);
-   	machine->WriteRegister(PrevPCReg, counter);
-    	counter = machine->ReadRegister(NextPCReg);
-    	machine->WriteRegister(PCReg, counter);
-   	machine->WriteRegister(NextPCReg, counter + 4);
-}
-
-// Input: Khong gian vung nho User(int) - gioi han cua buffer(int) - bo nho dem buffer(char*)
-// Output: So byte da sao chep(int)
-// Chuc nang: Sao chep vung nho System sang vung nho User
-int System2User(int Addr, int len, char* buffer)
-{
-	if (len < 0) return -1;
-	if (len == 0)return len;
-	int i = 0;
-	int oneChar = 0;
-	do{
-		oneChar = (int)buffer[i];
-		machine->WriteMem(Addr + i, 1, oneChar);
-		i++;
-	} while (i < len && oneChar != 0);
-	return i;
-}
-
+// Ham xu ly syscall PrintInt
 void syscallPrintInt()
 {	
 	int number = machine->ReadRegister(4);
 	if(number == 0)
     {
         synchconsole->Write("0", 1); // In ra man hinh so 0
-        IncreasePC();
+        // IncreasePC();
         return;    
     }
                     
@@ -237,29 +188,35 @@ void syscallPrintInt()
         buffer[0] = '-';
 		buffer[numberOfNum + 1] = 0;
         synchconsole->Write(buffer, numberOfNum + 1);
-        delete buffer;
-        IncreasePC();
+        delete[] buffer;
+        // IncreasePC();
         return;
     }
 	buffer[numberOfNum] = 0;	
     synchconsole->Write(buffer, numberOfNum);
-    delete buffer;
-    IncreasePC();
+    delete[] buffer;
+    // IncreasePC();
     return;        		
 }
 
-void syscallReadString(){
-    
+void syscallReadString() {
     int Addr;
     int length;
 	char* buffer;
 	Addr = machine->ReadRegister(4); // Lay dia chi tham so buffer truyen vao tu thanh ghi so 4
 	length = machine->ReadRegister(5); // Lay do dai toi da cua chuoi nhap vao tu thanh ghi so 5
 	buffer = User2System(Addr, length); // Copy chuoi tu vung nho User Space sang System Space
-	synchconsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
-	System2User(Addr, length, buffer); // Copy chuoi tu vung nho System Space sang vung nho User Space
-	delete buffer; 
-	IncreasePC(); // Tang Program Counter 
+	int bytesRead = synchconsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
+	
+    // Neu nguoi dung Ctrl-A: ket thuc doc
+    if (bytesRead < 0) {
+        delete[] buffer;
+        printf("Read cancelled.");
+    }
+
+    System2User(Addr, length, buffer); // Copy chuoi tu vung nho System Space sang vung nho User Space
+	delete[] buffer; 
+	// IncreasePC(); // Tang Program Counter 
 	return;
 }
 
@@ -358,17 +315,17 @@ ExceptionHandler(ExceptionType which)
 					syscallPrintInt();
 					break;
 
-                		case SC_ReadString:
-                    			syscallReadString();
-                    			break;	
+        		case SC_ReadString:
+            		syscallReadString();
+            		break;	
 
-                		case SC_PrintString:
-                    			syscallPrintString();
+        		case SC_PrintString:
+            		syscallPrintString();
 					break;    
 				default:
 					break;
 			}		
-
+            // Tang program counter
 			fetchNextInstruction();
 	}
 }
