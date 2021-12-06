@@ -9,24 +9,40 @@
 
 #include "syscall.h"
 
-int A[1024];	/* size of physical memory; with code, we'll run out of space!*/
+int A[100];	/* size of physical memory; with code, we'll run out of space!*/
 
 int
 main()
 {
-    int i, j, tmp;
+    int n = 0;
+	int i, j, temp;
+	PrintString("Nhap so luong phan tu: ");
+	//So luong phan tu
+   	n = ReadInt();
+	if (n <= 100)
+	{
+		//Lan luot nhap cac phan tu
+		for (i = 0; i < n; i++)
+		{
+			A[i] = ReadInt();
+		}
+		//Sap xep mang bang bubble sort.
+		for (i = 0; i < n - 1; i++)
+			for (j = i + 1; j < n; j++)
+				if (A[i] > A[j]) 
+				{	
+					temp = A[j];
+					A[j] = A[i];
+					A[i] = temp;
+				}
 
-    /* first initialize the array, in reverse sorted order */
-    for (i = 0; i < 1024; i++)		
-        A[i] = 1024 - i;
-
-    /* then sort! */
-    for (i = 0; i < 1023; i++)
-        for (j = i; j < (1023 - i); j++)
-	   if (A[j] > A[j + 1]) {	/* out of order -> need to swap ! */
-	      tmp = A[j];
-	      A[j] = A[j + 1];
-	      A[j + 1] = tmp;
-    	   }
-    Exit(A[0]);		/* and then we're done -- should be 0! */
+		//In mang sau khi duoc sap xep.
+		PrintString("Mang sau khi duoc sap xep:\n");
+		for (i = 0; i < n; i++)
+		{
+			PrintInt(A[i]);
+			PrintString("\t");
+		}
+		PrintString("\n");
+	}
 }
