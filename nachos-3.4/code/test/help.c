@@ -17,7 +17,7 @@ PrintString("\t19120630 - Nguyen Van Quan\n");
 PrintString("\t19120688 - Do Nhat Toan\n");
 PrintString("\t19120729 - Bui Ngoc Thao vy\n\n");
 PrintString("            -----MO TA VE 2 CHUONG TRINH DEMO-----\n\n");
-PrintString("Chuong trinh ascii: Don gian chi la chay vong lap for de in ra 128 ky tu trong bang ma ascii\n");
+PrintString("Chuong trinh ascii: Don gian chi la chay vong lap for de in ra bang ma ascii, chuong trinh chi in nhung ma ascii co the in duoc (tu ky tu thu 32 den ky tu thu 126).\n");
 PrintString("\nChuong trinh sort: \n");
 PrintString("\t-Nhap so luong phan tu cua mang can sap xep (n<=100)\n");
 PrintString("\t-Lan luot nhap n phan tu vao trong mang\n");
