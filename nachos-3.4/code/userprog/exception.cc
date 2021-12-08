@@ -101,31 +101,32 @@ void syscallReadInt() {
     // synchconsole tra ve -1 => nguoi dung end stream
     if (numBytesRead == -1) {
         printf("\nRead cancelled.\n");
+        delete[] buffer;
         return;
     }
 
     bool isNegative = false;
-
+    int firstNumIndex = 0;      // Index cua ky tu dau tien (de xu ly cac dau cach va so am)
+    
+    for(firstNumIndex = 0; buffer[firstNumIndex] == ' '; firstNumIndex++);
+    for(numBytesRead; buffer[numBytesRead - 1] == ' '; numBytesRead--);
+    // firstNumIndex: can duoi, numBytesRead: can tren
+    
+    // printf("First num: %d, numBytesRead: %d\n", firstNumIndex, numBytesRead);
     // Kiem tra so am
-    if (buffer[0] == '-') {
+    if (buffer[firstNumIndex] == '-') {
         isNegative = true;
-        // Bo ki tu dau tien di 
-        numBytesRead--;
-        buffer++;
+        // Bo ki tu dau tien di
+        firstNumIndex++;
     }
 
     int result = 0;
     // Thuat toan doi chuoi sang so nguyen
     // numBytesRead chinh la so chu so cua so vua nhap
-    for (int i = 0; i < numBytesRead; i++) {
-        // Kiem tra tinh hop le cua ki tu
+    for (int i = firstNumIndex; i < numBytesRead; i++) {
         if (buffer[i] < '0' || buffer[i] > '9') {
             printf("\nInvalid digit: %c\n", buffer[i]);
 
-            // Restore buffer
-            if (isNegative) {
-                buffer--;
-            }
             delete[] buffer;
             return;
         }
@@ -135,8 +136,8 @@ void syscallReadInt() {
     }
     if (isNegative) {
         result *= -1;
-        buffer--;
     }
+    // printf("Debug: Read %d\n", result);
 
     // Tra ket qua ve
     machine->WriteRegister(2, result);
@@ -205,7 +206,7 @@ void syscallReadString() {
 	char* buffer;
 	Addr = machine->ReadRegister(4); // Lay dia chi tham so buffer truyen vao tu thanh ghi so 4
 	length = machine->ReadRegister(5); // Lay do dai toi da cua chuoi nhap vao tu thanh ghi so 5
-	buffer = User2System(Addr, length); // Copy chuoi tu vung nho User Space sang System Space
+	buffer = new char[length];
 	int bytesRead = synchconsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
 	
     // Neu nguoi dung Ctrl-A: ket thuc doc
@@ -227,11 +228,13 @@ void syscallPrintString(){
 	int Addr;
 	char* buffer;
 	Addr = machine->ReadRegister(4); // Lay dia chi cua tham so buffer tu thanh ghi so 4
-	buffer = User2System(Addr, 255); // Copy chuoi tu vung nho User Space sang System Space voi bo dem buffer dai 255 ki tu
+	// for(maxLength = 0; Addr[maxLength] != 0; maxLength++); SEGMENTATION FAULT
+
+    buffer = User2System(Addr, 255); // Copy chuoi tu vung nho User Space sang System Space voi bo dem buffer dai 255 ki tu
 	int length = 0;
 	while (buffer[length] != 0) length++; // Dem do dai that cua chuoi
 	synchconsole->Write(buffer, length + 1); // Goi ham Write cua SynchConsole de in chuoi
-	delete buffer; 
+	delete[] buffer; 
 	    //IncreasePC(); // Tang Program Counter 
 }
     
