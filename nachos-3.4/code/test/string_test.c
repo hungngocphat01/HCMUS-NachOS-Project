@@ -1,9 +1,9 @@
 #include "syscall.h"
 
 int main() {
+    char ten[100];
     PrintString("Ten ban la gi? >> ");
-    char name[20];
-    ReadString(name, 20);
+    ReadString(ten, 100);
     PrintString("Xin chao, ");
     PrintString(ten);
     PrintString("\n");

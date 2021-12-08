@@ -8,24 +8,25 @@
  */
 
 #include "syscall.h"
-
-int A[100];	/* size of physical memory; with code, we'll run out of space!*/
-
-int
-main()
+int main()
 {
-    int n = 0;
+  int n = 0;
 	int i, j, temp;
 	PrintString("Nhap so luong phan tu: ");
 	//So luong phan tu
-   	n = ReadInt();
-	if (n <= 100)
+  n = ReadInt();
+	if (n > 0 && n <= 100)
 	{
+    int A[100];
 		//Lan luot nhap cac phan tu
 		for (i = 0; i < n; i++)
 		{
+      PrintString("Nhap phan tu thu[");
+      PrintInt(i);
+      PrintString("]: ");
 			A[i] = ReadInt();
 		}
+    PrintString("Dang sap xep...\n");
 		//Sap xep mang bang bubble sort.
 		for (i = 0; i < n - 1; i++)
 			for (j = i + 1; j < n; j++)
@@ -44,5 +45,7 @@ main()
 			PrintString("\t");
 		}
 		PrintString("\n");
-	}
+	} else {
+    PrintString("Vui long nhap mot so phu hop nho hon 100!!");
+  }
 }
