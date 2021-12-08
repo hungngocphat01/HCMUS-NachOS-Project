@@ -25,7 +25,13 @@
 #include "system.h"
 #include "syscall.h"
 #include "syscall_utils.h"
+
 #define MAX_SIZE 100
+// Macro de doc/ghi thanh ghi
+#define SYSCALL_RET(VALUE) machine->WriteRegister(2, VALUE)
+#define WRITE_REGISTER(REG, VALUE) machine->ReadRegister(REG, VALUE)
+#define READ_REGISTER(REG) machine->ReadRegister(REG)
+#define GET_ARGUMENT(N) machine->ReadRegister(N + 3)
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -52,10 +58,10 @@
 
 // Ham xy ly syscall Sub
 void syscallSub() {
-    int a = machine->ReadRegister(4);
-    int b = machine->ReadRegister(5);
+    int a = GET_ARGUMENT(1);
+    int b = GET_ARGUMENT(2);
     int result = a - b;
-    machine->WriteRegister(2, result);
+    SYSCALL_RET(result);
 
     printf("Service called. %d - %d is %d\n", a, b, result);
 }
@@ -70,13 +76,13 @@ void syscallReadChar() {
         printf("\nRead cancelled.\n");
     }
 
-    machine->WriteRegister(2, c);
+    SYSCALL_RET(c);
 }
 
 // Ham xy ly syscall PrintChar
 void syscallPrintChar() {
     // Doc tham so 1
-    int arg = machine->ReadRegister(4);
+    int arg = GET_ARGUMENT(1);
     // Kiem tra tinh hop le cua ky tu
     if (arg < 0 || arg > 255) {
         printf("\nInvalid character!!! ASCII code: %d\n", arg);
@@ -108,7 +114,7 @@ void syscallReadInt() {
     bool isNegative = false;
     int firstNumIndex = 0;      // Index cua ky tu dau tien (de xu ly cac dau cach va so am)
     
-    for(firstNumIndex = 0; buffer[firstNumIndex] == ' '; firstNumIndex++);
+    for(firstNumIndex = 0; buffer[firstNumIndex] == ' ' && firstNumIndex < numBytesRead; firstNumIndex++);
     for(numBytesRead; buffer[numBytesRead - 1] == ' '; numBytesRead--);
     // firstNumIndex: can duoi, numBytesRead: can tren
     
@@ -128,6 +134,7 @@ void syscallReadInt() {
             printf("\nInvalid digit: %c\n", buffer[i]);
 
             delete[] buffer;
+            SYSCALL_RET(0);
             return;
         }
 
@@ -140,15 +147,14 @@ void syscallReadInt() {
     // printf("Debug: Read %d\n", result);
 
     // Tra ket qua ve
-    machine->WriteRegister(2, result);
-
+    SYSCALL_RET(result);
     delete[] buffer;
 }
 
 // Ham xu ly syscall PrintInt
 void syscallPrintInt()
 {	
-	int number = machine->ReadRegister(4);
+	int number = GET_ARGUMENT(1);
 	if(number == 0)
     {
         synchconsole->Write("0", 1); // In ra man hinh so 0
@@ -204,15 +210,16 @@ void syscallReadString() {
     int Addr;
     int length;
 	char* buffer;
-	Addr = machine->ReadRegister(4); // Lay dia chi tham so buffer truyen vao tu thanh ghi so 4
-	length = machine->ReadRegister(5); // Lay do dai toi da cua chuoi nhap vao tu thanh ghi so 5
-	buffer = new char[length];
+	Addr = GET_ARGUMENT(1); // Lay dia chi tham so buffer truyen vao tu thanh ghi so 4
+	length = GET_ARGUMENT(2); // Lay do dai toi da cua chuoi nhap vao tu thanh ghi so 5
+	buffer = new char[length + 1];
 	int bytesRead = synchconsole->Read(buffer, length); // Goi ham Read cua SynchConsole de doc chuoi
 	
     // Neu nguoi dung Ctrl-A: ket thuc doc
     if (bytesRead < 0) {
         delete[] buffer;
         printf("Read cancelled.");
+        return;
     }
 
     System2User(Addr, length, buffer); // Copy chuoi tu vung nho System Space sang vung nho User Space
@@ -227,7 +234,7 @@ void syscallPrintString(){
 	// Cong dung: Xuat mot chuoi la tham so buffer truyen vao ra man hinh
 	int Addr;
 	char* buffer;
-	Addr = machine->ReadRegister(4); // Lay dia chi cua tham so buffer tu thanh ghi so 4
+	Addr = GET_ARGUMENT(1); // Lay dia chi cua tham so buffer tu thanh ghi so 4
 	// for(maxLength = 0; Addr[maxLength] != 0; maxLength++); SEGMENTATION FAULT
 
     buffer = User2System(Addr, 255); // Copy chuoi tu vung nho User Space sang System Space voi bo dem buffer dai 255 ki tu
@@ -242,7 +249,7 @@ void syscallPrintString(){
 void
 ExceptionHandler(ExceptionType which)
 {
-    int type = machine->ReadRegister(2);
+    int type = READ_REGISTER(2);
 	
 	switch(which){
 		case NoException:
