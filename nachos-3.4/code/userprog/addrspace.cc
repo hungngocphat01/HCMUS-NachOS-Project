@@ -85,17 +85,28 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
-// first, set up the translation 
+    // first, set up the translation
+    // So trang vat ly con trong 
+    int emptyPages = physFrameMarker->NumClear();
+    if (numPages > emptyPages) {
+      printf("ADDRSPACE: Not enough physical pages");
+      numPages = 0;
+      delete executable;
+      return;
+    }
+    
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
-					// a separate page, we could set its 
-					// pages to be read-only
+     	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+      // Tim trang trong chua su dung va danh dau da su dung
+      pageTable[i].physicalPage = physFrameMarker->Find();
+      physFrameMarker->Mark(pageTable[i].physicalPage);
+      pageTable[i].valid = TRUE;
+     	pageTable[i].use = FALSE;
+     	pageTable[i].dirty = FALSE;
+     	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
+			// a separate page, we could set its 
+			// pages to be read-only
     }
     
 // zero out the entire address space, to zero the unitialized data segment 

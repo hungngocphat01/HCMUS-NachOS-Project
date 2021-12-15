@@ -18,7 +18,6 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
-SynchConsole* synchconsole;
 
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
@@ -31,6 +30,8 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 PTable* processTab;
+SynchConsole* synchconsole;
+BitMap* physFrameMarker;
 #endif
 
 #ifdef NETWORK
@@ -86,6 +87,7 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program
     processTab = new PTable(10);
+    physFrameMarker = new BitMap(NumPhysPages);
 #endif
 #ifdef FILESYS_NEEDED
     bool format = FALSE;	// format disk

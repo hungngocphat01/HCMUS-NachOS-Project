@@ -35,10 +35,10 @@ int PTable::ExecUpdate(char* filename)
 	OpenFile *executable = fileSystem->Open(filename);
 	if (executable == NULL) 
 	{
-		printf("\nUnable to open file %s\n", filename);
+		printf("\nPTABLE: Unable to open file %s\n", filename);
 		bmsem->V();
 		return -1;
-    	}
+  }
 	delete executable;			// close file
 ////////////////////////////////////////////////////////////
 
@@ -60,7 +60,6 @@ int PTable::ExecUpdate(char* filename)
 		return -1;
 	}
 ////////////////////////////////////////////////////////////
-
 	pcb[ID]= new PCB(ID);
 	bm->Mark(ID);
 	int pID= pcb[ID]->Exec(filename,ID);

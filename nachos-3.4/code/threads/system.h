@@ -17,6 +17,7 @@
 #include "timer.h"
 #include "synchcons.h"
 #include "ptable.h"
+#include "bitmap.h"
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else
@@ -35,6 +36,7 @@ extern SynchConsole* synchconsole;
 #include "machine.h"
 extern Machine* machine;	// user program memory and registers
 extern PTable* processTab;
+extern BitMap* physFrameMarker; // bitmap de danh dau cac trang vat ly
 #endif
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 

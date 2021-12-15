@@ -246,58 +246,72 @@ void syscallPrintString(){
 }
     
 
+void syscallExec() {
+  int programNameAddr = GET_ARGUMENT(1);
+  char* programName = User2System(programNameAddr, MAX_SIZE);
+  if (!programName) {
+    printf("SYSCALL EXEC: Khong mo duoc file!");
+    fflush(stdin);
+    SYSCALL_RET(-1);
+    return;
+  }
+  // printf("Called exec: '%s'", programName);
+  int pid = processTab->ExecUpdate(programName);
+  SYSCALL_RET(pid);
+}
+
 void
 ExceptionHandler(ExceptionType which)
 {
-    int type = READ_REGISTER(2);
-	
+  int type = READ_REGISTER(2);
 	switch(which){
 		case NoException:
 			return;
 		
 		case PageFaultException:
-			DEBUG('a', "\nNo valid translation found.\n");
-			printf("\nNo valid translation found.\n");
+			DEBUG('a', "\nPageFaultException: No valid translation found.\n");
+			printf("\nPageFaultException: No valid translation found.\n");
 			interrupt->Halt();
 		break;
 
 		case ReadOnlyException:
-			DEBUG('a', "\nWrite attempted to page marked read-only.\n");
-			printf("\nWrite attempted to page marked read-only.\n");
+			DEBUG('a', "\nReadOnlyException: Write attempted to page marked read-only.\n");
+			printf("\nReadOnlyException: Write attempted to page marked read-only.\n");
 			interrupt->Halt();
 			break;
 
 		case BusErrorException:
-			DEBUG('a', "\nTranslation resulted invalid physical address.\n");
-			printf("\nTranslation resulted invalid physical address.\n");
+			DEBUG('a', "\nBusErrorException: Translation resulted invalid physical address.\n");
+			printf("\nBusErrorException: Translation resulted invalid physical address.\n");
 			interrupt->Halt();
 			break;
 
 		case AddressErrorException:
-			DEBUG('a', "\nUnaligned reference or one that was beyond the end of the address space.\n");
-			printf("\nUnaligned reference or one that was beyond the end of the address space.\n");
+			DEBUG('a', "\nAddressErrorException: Unaligned reference or one that was beyond the end of the address space.\n");
+			printf("\nAddressErrorException: Unaligned reference or one that was beyond the end of the address space.\n");
 			interrupt->Halt();
 			break;
 
 		case OverflowException:
-			DEBUG('a', "\nInteger overflow in add or sub.\n");
-			printf("\nInteger overflow in add or sub.\n");
+			DEBUG('a', "\nOverflowException: Integer overflow in add or sub.\n");
+			printf("\nOverflowException: Integer overflow in add or sub.\n");
 			interrupt->Halt();
 			break;
 
 		case IllegalInstrException:
-			DEBUG('a', "\nUnimplemented or reserved instr.\n");
-			printf("\nUnimplemented or reserved instr.\n");
+			DEBUG('a', "\nIllegalInstrException: Unimplemented or reserved instr.\n");
+			printf("\nIllegalInstrException: Unimplemented or reserved instr.\n");
 			interrupt->Halt();
 			break;
 
 		case NumExceptionTypes:
-			DEBUG('a', "\nNumber exception types.\n");
-			printf("\nNumber exception types.\n");
+			DEBUG('a', "\nNumExceptionTypes: Number exception types.\n");
+			printf("\nNumExceptionTypes: Number exception types.\n");
 			interrupt->Halt();
 			break;
 			
 		case SyscallException:
+      // printf("Systemcall: %d\n", type);
 			switch (type) {
 				// Khi nguoi dung goi syscall halt
 				case SC_Halt:
@@ -325,17 +339,21 @@ ExceptionHandler(ExceptionType which)
 					syscallPrintInt();
 					break;
 
-        		case SC_ReadString:
-            		syscallReadString();
-            		break;	
+      	case SC_ReadString:
+         	syscallReadString();
+         	break;	
 
-        		case SC_PrintString:
-            		syscallPrintString();
-					break;    
-				default:
+      	case SC_PrintString:
+         	syscallPrintString();
+			    break;    
+        case SC_Exec:
+          syscallExec();
+          break;
+        default:
+          printf("\nInvalid system call: %d. Please check again\n", type);
 					break;
 			}		
-            // Tang program counter
+      // Tang program counter
 			fetchNextInstruction();
 	}
 }
