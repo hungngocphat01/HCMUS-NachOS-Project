@@ -16,7 +16,7 @@
 #include "stats.h"
 #include "timer.h"
 #include "synchcons.h"
-
+#include "ptable.h"
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else
@@ -34,6 +34,7 @@ extern SynchConsole* synchconsole;
 #ifdef USER_PROGRAM
 #include "machine.h"
 extern Machine* machine;	// user program memory and registers
+extern PTable* processTab;
 #endif
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 

@@ -30,6 +30,7 @@ SynchDisk   *synchDisk;
 
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
+PTable* processTab;
 #endif
 
 #ifdef NETWORK
@@ -84,6 +85,7 @@ Initialize(int argc, char **argv)
 
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program
+    processTab = new PTable(10);
 #endif
 #ifdef FILESYS_NEEDED
     bool format = FALSE;	// format disk
