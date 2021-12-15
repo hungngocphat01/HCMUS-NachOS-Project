@@ -257,6 +257,7 @@ void syscallExec() {
   }
   // printf("Called exec: '%s'", programName);
   int pid = processTab->ExecUpdate(programName);
+  // printf("\nExecute %s with pid=%d\n", programName, pid);
   SYSCALL_RET(pid);
 }
 

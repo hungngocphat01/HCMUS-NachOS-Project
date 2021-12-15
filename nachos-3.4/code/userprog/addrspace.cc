@@ -97,10 +97,12 @@ AddrSpace::AddrSpace(OpenFile *executable)
     
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
-     	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+     	pageTable[i].virtualPage = i;
+      
       // Tim trang trong chua su dung va danh dau da su dung
       pageTable[i].physicalPage = physFrameMarker->Find();
       physFrameMarker->Mark(pageTable[i].physicalPage);
+
       pageTable[i].valid = TRUE;
      	pageTable[i].use = FALSE;
      	pageTable[i].dirty = FALSE;

@@ -119,10 +119,10 @@ void MyStartProcess(int pID)
     printf("PCB: Cannot find executable!");
     return;
   }
-  printf("\nExecutable found: %s", filename);
+  // printf("\nExecutable found: %s", filename);
 
 	AddrSpace *space= new AddrSpace(executable);
-  printf("\nAddress space allocated\n");
+  // printf("\nAddress space allocated\n");
 	if(space == NULL)
 	{
 		printf("\nLoi: Khong du bo nho de cap phat cho tien trinh !!!\n");
