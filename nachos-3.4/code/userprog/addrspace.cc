@@ -62,6 +62,8 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+    addrLock->Acquire();
+    
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -91,6 +93,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     if (numPages > emptyPages) {
       printf("ADDRSPACE: Not enough physical pages");
       numPages = 0;
+      addrLock->Release();
       delete executable;
       return;
     }
@@ -128,7 +131,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
         executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);
     }
-
+    addrLock->Release();
 }
 
 //----------------------------------------------------------------------

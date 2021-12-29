@@ -244,7 +244,30 @@ void syscallPrintString(){
 	delete[] buffer; 
 	    //IncreasePC(); // Tang Program Counter 
 }
-    
+
+int doSC_Exit()
+{
+  printf("\n\n Calling SC_Exit.");
+  DEBUG('a', "\n\n Calling SC_Exit.");
+
+  // avoid harry
+  IntStatus oldLevel = interrupt->SetLevel(IntOff);
+
+  int exitStatus;
+  //ProcessHashData *processData;
+
+  exitStatus = machine->ReadRegister(4);
+
+  // if process exited with error, print error
+  if (exitStatus != 0)
+    printf("\nProcess %s exited with error level %d",currentThread->getName(),exitStatus);
+
+  //  currentThread->Finish();
+  (void) interrupt->SetLevel(oldLevel);
+  interrupt->Halt();
+  return 0;
+}
+
 
 void syscallExec() {
   int programNameAddr = GET_ARGUMENT(1);
@@ -255,6 +278,29 @@ void syscallExec() {
     SYSCALL_RET(-1);
     return;
   }
+
+  /////////////// Checksum
+  OpenFile* file = fileSystem->Open(programName);
+  int fileSize;
+  fileSize = file->Length();
+  int i;
+  // uint16_t
+  unsigned short c0 = 0;
+  unsigned short c1 = 0;
+  long numBytesRead = 0;
+  for (i = 0; i < fileSize; i++) {
+    char temp;
+    file->Read(&temp, 1);
+
+    c0 = (c0 + (int)temp) % 255;
+    c1 = (c1 + c0) % 255;
+    numBytesRead++;
+  }
+  ASSERT(numBytesRead == fileSize);
+  printf("Fletcher checksum for '%s': %d  (%d bytes checked)\n", programName, (c1 << 8) | c0, numBytesRead);
+  delete file;
+  //////////////////////////////////
+
   // printf("Called exec: '%s'", programName);
   int pid = processTab->ExecUpdate(programName);
   // printf("\nExecute %s with pid=%d\n", programName, pid);
@@ -320,8 +366,8 @@ ExceptionHandler(ExceptionType which)
 					interrupt->Halt();
 					break; 
 				// Tru 2 so 
-				case SC_Sub:
-					syscallSub();
+				case SC_Exit:
+					doSC_Exit();
 					break;
 
 				case SC_ReadChar:

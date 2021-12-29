@@ -32,6 +32,7 @@ Machine *machine;	// user program memory and registers
 PTable* processTab;
 SynchConsole* synchconsole;
 BitMap* physFrameMarker;
+Lock* addrLock;
 #endif
 
 #ifdef NETWORK
@@ -88,6 +89,7 @@ Initialize(int argc, char **argv)
     bool debugUserProg = FALSE;	// single step user program
     processTab = new PTable(10);
     physFrameMarker = new BitMap(NumPhysPages);
+    addrLock = new Lock("address lock");
 #endif
 #ifdef FILESYS_NEEDED
     bool format = FALSE;	// format disk
